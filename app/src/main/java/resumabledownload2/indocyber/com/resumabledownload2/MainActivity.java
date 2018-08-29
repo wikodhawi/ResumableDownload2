@@ -1,6 +1,11 @@
 package resumabledownload2.indocyber.com.resumabledownload2;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -43,13 +48,19 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 import resumabledownload2.indocyber.com.resumabledownload2.model.Identity.Identity;
 import resumabledownload2.indocyber.com.resumabledownload2.model.Identity.Identity_Table;
+import resumabledownload2.indocyber.com.resumabledownload2.network.Connect;
 import resumabledownload2.indocyber.com.resumabledownload2.network.Constant;
 import resumabledownload2.indocyber.com.resumabledownload2.network.GlobalMonitor;
+import resumabledownload2.indocyber.com.resumabledownload2.util.Helper;
 import resumabledownload2.indocyber.com.resumabledownload2.util.ZipExtractor;
+
+import static com.liulishuo.filedownloader.database.SqliteDatabaseImpl.TABLE_NAME;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -70,11 +81,15 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar1;
     private Button extractBtn1;
     private View parentView;
+    private Button deleteDbBtn1;
 
     private ProgressDialog progressDialog;
 
     private EditText txtId;
     private Button btnSearch;
+
+    private SQLiteDatabase db;
+    SQLiteOpenHelper sqLiteOpenHelper;
 
     private void assignViews() {
         parentView=(View)findViewById(android.R.id.content);
@@ -87,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
         extractBtn1 = (Button)findViewById(R.id.extract_btn_1);
         txtId=(EditText)findViewById(R.id.txtId);
         btnSearch=(Button)findViewById(R.id.btnSearch);
+        deleteDbBtn1=(Button)findViewById(R.id.deleteDb_btn_1);
+
     }
 
     @Override
@@ -110,7 +127,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @SuppressLint("WrongConstant")
     private void initFilePathEqualDirAndFileName() {
+        db=openOrCreateDatabase("/data/data/resumabledownload2.indocyber.com.resumabledownload2/databases/resumableDb.db",
+                SQLiteDatabase.CREATE_IF_NECESSARY,null);
         // task 1
         startBtn1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,7 +156,25 @@ public class MainActivity extends AppCompatActivity {
         extractBtn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                extractFile();
+//                extractFile();
+                new storeDb().execute( );
+/*
+                Identity identity=new Identity();
+                identity.setId("1");
+                identity.setPekerjaan("asdf");
+                identity.setCitacita2kerjaan("aasdf");
+                identity.setCitacita3("asdf");
+                identity.setKolomsebelas("asdf");
+                identity.setKolomtwelve("asdf");
+                identity.setNama3("asdf");
+                identity.setPekerjaan4kolom("asdf");
+                identity.setCitacita4kolom("adsf");
+                identity.setPekerjaan3("asdf");
+                identity.setNama4kolom("asdf");
+                identity.setNama("aasdf");
+                insertData(identity);
+*/
+//                insertData();
             }
         });
 
@@ -146,12 +184,97 @@ public class MainActivity extends AppCompatActivity {
                 searchById();
             }
         });
+
+        deleteDbBtn1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                if(deleteTable())
+//                    Snackbar.make(parentView, "success delete table", Snackbar.LENGTH_LONG).show();
+//                else
+//                    Snackbar.make(parentView, "failed delete table", Snackbar.LENGTH_LONG).show();
+                deleteTable();
+            }
+        });
+    }
+
+    public void insertData(Identity identity)
+    {
+        String sql = "INSERT INTO Identity(" +
+                "nama4kolom, " +
+                "kolomtwelve, " +
+                "id, " +
+                "nama3, " +
+                "citacita4kolom, " +
+                "nama, " +
+                "pekerjaan4kolom, " +
+                "kolomsebelas," +
+                "pekerjaan3, " +
+                "pekerjaan, " +
+                "citacita2kerjaan, " +
+                "citacita3) VALUES('" +
+                identity.getNama4kolom() +"','"+
+                identity.getKolomtwelve()+"','"+
+                identity.getId()+"','"+
+                identity.getNama3()+"','"+
+                identity.getCitacita4kolom()+"','"+
+                identity.getNama()+"','"+
+                identity.getPekerjaan4kolom()+"','"+
+                identity.getKolomsebelas()+"','"+
+                identity.getPekerjaan3()+"','"+
+                identity.getPekerjaan()+"','"+
+                identity.getCitacita2kerjaan()+"','"+
+                identity.getCitacita3()+
+                "')";
+        try{
+
+            db.beginTransaction();
+            db.execSQL(sql);
+            db.setTransactionSuccessful();
+            db.endTransaction();
+
+        }catch (android.database.SQLException e)
+        {
+            Log.d("resultGotError", e.getMessage()+" at "+identity.getId());
+            db.endTransaction();
+//            Snackbar.make(parentView, e.getMessage()+" at "+identity.getId(), Snackbar.LENGTH_LONG).show();
+        }
+
+//        Connect connect=new Connect();
+//        try {
+//            Connection connection=connect.connect();
+//        } catch (Exception e) {
+//
+//        }
     }
 
     public void searchById()
     {
-        Identity identity= SQLite.select().from(Identity.class).where(Identity_Table.id.eq(txtId.getText().toString())).querySingle();
-        Snackbar.make(parentView, identity.getPekerjaan4kolom(), Snackbar.LENGTH_LONG).show();
+        try{
+            Identity identity= SQLite.select().from(Identity.class).where(Identity_Table.id.eq(txtId.getText().toString())).querySingle();
+            Snackbar.make(parentView, identity.getPekerjaan4kolom(), Snackbar.LENGTH_LONG).show();
+        } catch (Exception e)
+        {
+            Snackbar.make(parentView, "Not found", Snackbar.LENGTH_LONG).show();
+        }
+
+
+    }
+
+    public void deleteTable()
+    {
+        Helper helper = new Helper(MainActivity.this);
+        try{
+//            db = helper.getWritableDatabase();
+//            db.execSQL("DELETE FROM Identity" );
+//            db.close();
+            SQLite.delete().from(Identity.class).execute();
+            Snackbar.make(parentView, "success delete data", Snackbar.LENGTH_LONG).show();
+        }catch ( Exception e)
+        {
+            Snackbar.make(parentView, "failed delete data", Snackbar.LENGTH_LONG).show();
+        }
+
+
     }
 
     public void setFileLocation(String fileLocation) {
@@ -355,6 +478,30 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    private class storeDb extends AsyncTask<Void, Void, Void>
+    {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setMessage("Synchronizing");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            extractFile();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            progressDialog.dismiss();
+        }
+    }
+
     public void extractFile()
     {
 //        progressDialog = new ProgressDialog(MainActivity.this);
@@ -432,7 +579,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("result"+counter+"", person.getId()+"");
                 }
                 counter++;
-                saveDB(person);
+                insertData(person);
 //                break;
             }
             reader.close();
@@ -444,24 +591,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveDB(Identity items){
-        FlowManager.getDatabase(DemoApplication.class).
-                beginTransactionAsync(new ProcessModelTransaction.Builder<>(
-                        new ProcessModelTransaction.ProcessModel<Identity>() {
-                            @Override
-                            public void processModel(Identity grocery, DatabaseWrapper wrapper) {
-                                grocery.save();
-                            }
-                        }
-                ).addAll(items).build()).error(new Transaction.Error() {
-            @Override
-            public void onError(@NonNull Transaction transaction, @NonNull Throwable error) {
-                Toast.makeText(getApplicationContext(), error.getMessage(),Toast.LENGTH_LONG);
-            }
-        }).success(new Transaction.Success() {
-            @Override
-            public void onSuccess(@NonNull Transaction transaction) {
-                Toast.makeText(getApplicationContext(), "Data berhasil di simpan di sqlLite", Toast.LENGTH_LONG);
-            }
-        }).build().execute();
+//        FlowManager.getDatabase(DemoApplication.class).
+//                beginTransactionAsync(new ProcessModelTransaction.Builder<>(
+//                        new ProcessModelTransaction.ProcessModel<Identity>() {
+//                            @Override
+//                            public void processModel(Identity grocery, DatabaseWrapper wrapper) {
+//                                grocery.save();
+//                            }
+//                        }
+//                ).addAll(items).build()).error(new Transaction.Error() {
+//            @Override
+//            public void onError(@NonNull Transaction transaction, @NonNull Throwable error) {
+//                Toast.makeText(getApplicationContext(), error.getMessage(),Toast.LENGTH_LONG);
+//            }
+//        }).success(new Transaction.Success() {
+//            @Override
+//            public void onSuccess(@NonNull Transaction transaction) {
+//                Toast.makeText(getApplicationContext(), "Data berhasil di simpan di sqlLite", Toast.LENGTH_LONG);
+//            }
+//        }).build().execute();
+
+
     }
 }

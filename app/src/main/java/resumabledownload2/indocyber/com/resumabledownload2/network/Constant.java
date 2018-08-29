@@ -10,9 +10,9 @@ public interface Constant {
     };
 
 //    String LIULISHUO_APK_URL = "http://cdn.llsapp.com/android/LLS-v4.0-595-20160908-143200.apk";
-    String LIULISHUO_APK_URL = "http://192.168.3.98:80/data/data1M.zip";
+    String LIULISHUO_APK_URL = "http://192.168.3.200:80/data/data1M.zip";
 //    String LIULISHUO_CONTENT_DISPOSITION_FILENAME = "LLS-v4.0-595-20160908-143200.apk";
-    String LIULISHUO_CONTENT_DISPOSITION_FILENAME = "http://192.168.3.98:80/data/data1M.zip";
+    String LIULISHUO_CONTENT_DISPOSITION_FILENAME = "http://192.168.3.200:80/data/data1M.zip";
 
     String[] BIG_FILE_URLS = {
             // 5m

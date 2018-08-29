@@ -60,11 +60,25 @@
             </LinearLayout>
 
 
-            <Button
-                android:id="@+id/extract_btn_1"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ekstract" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/extract_btn_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Ekstract" />
+
+                <Button
+                    android:id="@+id/deleteDb_btn_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Delete DB" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/filename_tv_1"
