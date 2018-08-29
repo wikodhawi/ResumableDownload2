@@ -50,7 +50,9 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import resumabledownload2.indocyber.com.resumabledownload2.model.Identity.Identity;
 import resumabledownload2.indocyber.com.resumabledownload2.model.Identity.Identity_Table;
@@ -227,15 +229,15 @@ public class MainActivity extends AppCompatActivity {
                 "')";
         try{
 
-            db.beginTransaction();
+//            db.beginTransaction();
             db.execSQL(sql);
-            db.setTransactionSuccessful();
-            db.endTransaction();
+//            db.setTransactionSuccessful();
+//            db.endTransaction();
 
         }catch (android.database.SQLException e)
         {
             Log.d("resultGotError", e.getMessage()+" at "+identity.getId());
-            db.endTransaction();
+//            db.endTransaction();
 //            Snackbar.make(parentView, e.getMessage()+" at "+identity.getId(), Snackbar.LENGTH_LONG).show();
         }
 
@@ -491,6 +493,13 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                }
+            });
+
             extractFile();
             return null;
         }
@@ -500,6 +509,176 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(aVoid);
             progressDialog.dismiss();
         }
+    }
+
+    private class insertDb extends  AsyncTask<List<Identity>, Integer, String>
+    {
+        /*
+        @Override
+        protected Identity doInBackground(Identity... identities) {
+            return identities[0];
+        }
+
+        @Override
+        protected void onPostExecute(Identity identities) {
+
+            super.onPostExecute(identities);
+            String result="";
+            String sql = "INSERT INTO Identity(" +
+                    "nama4kolom, " +
+                    "kolomtwelve, " +
+                    "id, " +
+                    "nama3, " +
+                    "citacita4kolom, " +
+                    "nama, " +
+                    "pekerjaan4kolom, " +
+                    "kolomsebelas," +
+                    "pekerjaan3, " +
+                    "pekerjaan, " +
+                    "citacita2kerjaan, " +
+                    "citacita3) VALUES('" +
+                    identities.getNama4kolom() +"','"+
+                    identities.getKolomtwelve()+"','"+
+                    identities.getId()+"','"+
+                    identities.getNama3()+"','"+
+                    identities.getCitacita4kolom()+"','"+
+                    identities.getNama()+"','"+
+                    identities.getPekerjaan4kolom()+"','"+
+                    identities.getKolomsebelas()+"','"+
+                    identities.getPekerjaan3()+"','"+
+                    identities.getPekerjaan()+"','"+
+                    identities.getCitacita2kerjaan()+"','"+
+                    identities.getCitacita3()+
+                    "')";
+            try{
+
+                db.beginTransaction();
+                db.execSQL(sql);
+                db.setTransactionSuccessful();
+                db.endTransaction();
+                result="success";
+
+            }catch (android.database.SQLException e)
+            {
+                Log.d("resultGotError", e.getMessage()+" at "+identities.getId());
+                result=e.getMessage();
+                db.endTransaction();
+//            Snackbar.make(parentView, e.getMessage()+" at "+identity.getId(), Snackbar.LENGTH_LONG).show();
+            }
+
+            Log.d("resultInsert", result);
+        }
+        */
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(List<Identity>... identities) {
+            String result="";
+            for(Identity identity: identities[0])
+            {
+                String sql = "INSERT INTO Identity(" +
+                        "nama4kolom, " +
+                        "kolomtwelve, " +
+                        "id, " +
+                        "nama3, " +
+                        "citacita4kolom, " +
+                        "nama, " +
+                        "pekerjaan4kolom, " +
+                        "kolomsebelas," +
+                        "pekerjaan3, " +
+                        "pekerjaan, " +
+                        "citacita2kerjaan, " +
+                        "citacita3) VALUES('" +
+                        identity.getNama4kolom() +"','"+
+                        identity.getKolomtwelve()+"','"+
+                        identity.getId()+"','"+
+                        identity.getNama3()+"','"+
+                        identity.getCitacita4kolom()+"','"+
+                        identity.getNama()+"','"+
+                        identity.getPekerjaan4kolom()+"','"+
+                        identity.getKolomsebelas()+"','"+
+                        identity.getPekerjaan3()+"','"+
+                        identity.getPekerjaan()+"','"+
+                        identity.getCitacita2kerjaan()+"','"+
+                        identity.getCitacita3()+
+                        "')";
+                try{
+
+                    db.beginTransaction();
+                    db.execSQL(sql);
+                    db.setTransactionSuccessful();
+                    db.endTransaction();
+                    result="success "+identity.getId();
+
+                }catch (android.database.SQLException e)
+                {
+                    Log.d("resultGotError", e.getMessage()+" at "+identity.getId());
+                    result=e.getMessage()+" at "+identity.getId();
+                    db.endTransaction();
+//            Snackbar.make(parentView, e.getMessage()+" at "+identity.getId(), Snackbar.LENGTH_LONG).show();
+                }
+            }
+
+//            String sql = "INSERT INTO Identity(" +
+//                    "nama4kolom, " +
+//                    "kolomtwelve, " +
+//                    "id, " +
+//                    "nama3, " +
+//                    "citacita4kolom, " +
+//                    "nama, " +
+//                    "pekerjaan4kolom, " +
+//                    "kolomsebelas," +
+//                    "pekerjaan3, " +
+//                    "pekerjaan, " +
+//                    "citacita2kerjaan, " +
+//                    "citacita3) VALUES('" +
+//                    identities[0].getNama4kolom() +"','"+
+//                    identities[0].getKolomtwelve()+"','"+
+//                    identities[0].getId()+"','"+
+//                    identities[0].getNama3()+"','"+
+//                    identities[0].getCitacita4kolom()+"','"+
+//                    identities[0].getNama()+"','"+
+//                    identities[0].getPekerjaan4kolom()+"','"+
+//                    identities[0].getKolomsebelas()+"','"+
+//                    identities[0].getPekerjaan3()+"','"+
+//                    identities[0].getPekerjaan()+"','"+
+//                    identities[0].getCitacita2kerjaan()+"','"+
+//                    identities[0].getCitacita3()+
+//                    "')";
+//            try{
+//
+//                db.beginTransaction();
+//                db.execSQL(sql);
+//                db.setTransactionSuccessful();
+//                db.endTransaction();
+//                result="success "+identities[0].getId();
+//
+//            }catch (android.database.SQLException e)
+//            {
+//                Log.d("resultGotError", e.getMessage()+" at "+identities[0].getId());
+//                result=e.getMessage()+" at "+identities[0].getId();
+//                db.endTransaction();
+////            Snackbar.make(parentView, e.getMessage()+" at "+identity.getId(), Snackbar.LENGTH_LONG).show();
+//            }
+            return result;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Log.d("isSuccess",s);
+
+        }
+
     }
 
     public void extractFile()
@@ -563,6 +742,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void readStream(InputStream in) {
+        db.beginTransaction();
         try {
             JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
             Gson gson = new GsonBuilder().create();
@@ -570,6 +750,8 @@ public class MainActivity extends AppCompatActivity {
             // Read file in stream mode
             reader.beginArray();
             int counter=1;
+            List<Identity> identities=new ArrayList<>();
+
             while (reader.hasNext()) {
                 // Read data into object model
                 Identity person = gson.fromJson(reader, Identity.class);
@@ -577,17 +759,43 @@ public class MainActivity extends AppCompatActivity {
                 if (person.getId() != null ) {
 //                    System.out.println("Stream mode: " + person);
                     Log.d("result"+counter+"", person.getId()+"");
+//                    identities.add(person);
                 }
                 counter++;
+
+
+
                 insertData(person);
+
+
+
+//                new insertDb().execute(person);
+//                if(counter%50000==0)
+//                {
+//                    new insertDb().execute(identities);
+//                    try
+//                    {
+//                        TimeUnit.SECONDS.sleep((long)10);
+//
+//                    } catch (Exception e)
+//                    {
+//
+//                    }
+//                    identities.clear();
+//
+//                }
+
 //                break;
             }
             reader.close();
+            db.setTransactionSuccessful();
         } catch (UnsupportedEncodingException ex) {
 
         } catch (IOException ex) {
 
         }
+
+        db.endTransaction();
     }
 
     private void saveDB(Identity items){
