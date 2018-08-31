@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void insertData(Identity identity)
     {
-        String sql = "INSERT INTO Identity(" +
+        String sql = "INSERT or REPLACE INTO Identity(" +
                 "nama4kolom, " +
                 "kolomtwelve, " +
                 "id, " +
@@ -487,6 +487,7 @@ public class MainActivity extends AppCompatActivity {
             super.onPreExecute();
             progressDialog = new ProgressDialog(MainActivity.this);
             progressDialog.setMessage("Synchronizing");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setCancelable(false);
             progressDialog.show();
         }
